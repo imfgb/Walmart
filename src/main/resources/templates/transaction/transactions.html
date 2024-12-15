@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Transacciones - Walmart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body>
+    <div th:insert="navbar :: navbar"></div>
+    <div class="container mt-4">
+        <h1>Transacciones</h1>
+        <p>Aquí puedes gestionar las transacciones de inventarios.</p>
+    </div>
+    <div class="container mt-5">
+
+        <div class="row g-3 mb-5">
+            <div class="col-md-6">
+                <label for="startDate">Inicio</label>
+                <input id="startDate" class="form-control" type="date" />
+                <span id="startDateSelected"></span>
+            </div>
+            <div class="col-md-6">
+                <label for="endDate">Fin</label>
+                <input id="endDate" class="form-control" type="date" />
+                <span id="endDateSelected"></span>
+            </div>
+        </div>
+
+        <div class="row g-3 mb-5">
+            <div class="col-md-6">
+                <label for="filter" class="form-label">Filtrar por</label>
+                <select id="filter" name="filterId" class="form-select" disabled>
+                    <option value="default">-- Seleccione un criterio de filtrado --</option>
+                    <option value="employees">Empleados</option>
+                    <option value="storages">Almacenes</option>
+                    <option value="storagesAndProducts">Almacenes y productos</option>
+                    <option value="originDestiny">Origen/Destino</option>
+                </select>
+            </div>
+
+            <div class="col-md-6">
+                <label for="filter-value" class="form-label">Valor</label>
+                <select id="filter-value" name="filterValue" class="form-select" disabled>
+                    <option value="default">-- Seleccione un valor --</option>
+                </select>
+            </div>
+
+            <div id="second-filter-container" class="col-md-6" hidden>
+                <label for="second-filter-value" class="form-label">Segundo Valor</label>
+                <select id="second-filter-value" name="secondFilterValue" class="form-select" disabled>
+                    <option value="default">-- Seleccione un valor --</option>
+                </select>
+            </div>
+            <div class="col-12">
+                <button id="find-button" class="btn btn-primary">Buscar</button>
+                <a href="/transacciones" class="btn btn-secondary ms-3">Limpiar filtros</a>
+            </div>
+        </div>
+
+        <!-- Transactions Table -->
+        <div class="d-flex">
+            <a class="btn btn-primary mb-3 ms-auto" href="/transacciones/nueva" role="button">Nuevo</a>
+        </div>
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>Producto</th>
+                <th>Almacen</th>
+                <th>Razón</th>
+                <th>Fecha</th>
+                <th>Cantidad</th>
+                <th>Tipo</th>
+                <th>Origen o destino</th>
+                <th>Empleado</th>
+                <th>Acciones</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="transaction : ${transactions}">
+                <td th:text="${transaction.id}"></td>
+                <td th:text="${transaction.product.name}"></td>
+                <td th:text="${transaction.storage.name}"></td>
+                <td th:text="${transaction.reason}"></td>
+                <td th:text="${transaction.dateTime}"></td>
+                <td th:text="${transaction.quantity}"></td>
+                <td th:text="${transaction.type == 'IN' ? 'Entrada' : 'Salida'}"></td>
+                <td th:text="${transaction.originDestiny.name}"></td>
+                <td th:text="${transaction.employee.name}"></td>
+                <td>
+                    <a class="btn btn-warning" th:href="@{'/transacciones/editar/' + ${transaction.id}}" role="button">Editar</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script>
+        const startDate = document.getElementById('startDate');
+        const endDate = document.getElementById('endDate');
+        const filterCriteriaPicker = document.getElementById('filter');
+        const filterValue = document.getElementById('filter-value');
+        const secondFilterValue = document.getElementById("second-filter-value");
+        const findButton = document.getElementById("find-button");
+
+        let isStartDatePicked = false;
+        let isEndDatePicked = false;
+
+        findButton.addEventListener('click', () => {
+            const start = startDate.value;
+            const end = endDate.value;
+            const filter = filterCriteriaPicker.value;
+            const firstValue = filterValue.value;
+            const secondValue = secondFilterValue.value;
+
+            let url = `/transacciones/filtrar?startDate=${start}&endDate=${end}`;
+            if (filter !== "default") url += `&filter=${filter}&filterValue=${firstValue}`;
+            if (secondValue && secondValue !== "default") {
+                url += `&secondFilterValue=${secondValue}`;
+            }
+            window.location.href = url;
+        });
+
+        startDate.addEventListener('change', e =>{
+            isStartDatePicked = true;
+            if(isStartDatePicked && isEndDatePicked) {
+                document.getElementById('filter').disabled = false;
+            }
+        });
+
+        endDate.addEventListener('change', e => {
+            isEndDatePicked = true;
+            if(isStartDatePicked && isEndDatePicked) {
+                document.getElementById('filter').disabled = false;
+            }
+        });
+
+        filterCriteriaPicker.addEventListener('change', async (e) => {
+            const selectedCriteria = filterCriteriaPicker.value;
+            clearSelect(filterValue, "-- Seleccione un valor --");
+            clearSelect(secondFilterValue, "-- Seleccione un valor --");
+            document.getElementById("second-filter-container").hidden = true;
+            if(selectedCriteria === "storagesAndProducts") {
+                const storages = await (await fetch("/api/filter-data?filter=storages")).json();
+                const products = await (await fetch("/api/filter-data?filter=products")).json();
+                populateSelect(filterValue, storages);
+                document.getElementById("second-filter-container").hidden = false;
+                const secondFilterValue = document.getElementById("second-filter-value");
+                secondFilterValue.disabled = false;
+                populateSelect(secondFilterValue, products);
+            } else if(selectedCriteria === "originDestiny") {
+                const originDestinyTypes = {
+                    "storages": "Almacén",
+                    "clients": "Cliente",
+                    "providers": "Proveedor"
+                };
+                Object.entries(originDestinyTypes).forEach(([k, v]) => {
+                    const option = document.createElement("option");
+                    option.value = k;
+                    option.textContent = v;
+                    filterValue.appendChild(option);
+                });
+            }else {
+                const res = await fetch(`/api/filter-data?filter=${selectedCriteria}`);
+                if(!res.ok) {
+                    return;
+                }
+                const data = await res.json();
+                populateSelect(filterValue, data);
+            }
+            filterValue.disabled = false;
+        });
+
+        filterValue.addEventListener('change', async (e) => {
+            const value = e.target.value;
+            if(value === "storages" || value === "clients" || value === "providers") {
+                const data = await (await fetch(`/api/filter-data?filter=${value}`)).json();
+                document.getElementById("second-filter-container").hidden = false;
+                clearSelect(secondFilterValue, "-- Seleccione un valor --");
+                secondFilterValue.disabled = false;
+                populateSelect(secondFilterValue, data);
+            }
+        });
+
+        const populateSelect = (select, data) => {
+            data.forEach(element => {
+                const option = document.createElement("option");
+                option.value = element.id;
+                option.textContent = element.name;
+                select.appendChild(option);
+            });
+        };
+
+        const clearSelect = (select, message) => {
+            select.innerHTML = "";
+            const option = document.createElement("option");
+            option.value = "default";
+            option.textContent = message;
+            select.appendChild(option);
+        }
+    </script>
+</body>
+</html>

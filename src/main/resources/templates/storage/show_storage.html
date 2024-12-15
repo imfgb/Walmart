@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Ver Almacén - Walmart</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link href="/css/styles.css" rel="stylesheet">
+</head>
+<body>
+<div th:insert="navbar :: navbar"></div>
+
+<div class="container mt-5">
+    <h1>Editar Almacén</h1>
+    <p>Modifique los datos del almacén y guarde los cambios.</p>
+
+    <form th:method="put" th:action="@{/almacenes/{id}(id=${storage.id})}">
+        <!-- ID del almacén (no editable) -->
+        <div class="mb-3">
+            <label for="id" class="form-label">ID</label>
+            <input type="text" class="form-control" id="id" name="id" th:value="${storage.id}" readonly>
+        </div>
+
+        <!-- Nombre del almacén -->
+        <div class="mb-3">
+            <label for="name" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="name" name="name" th:value="${storage.name}" required>
+        </div>
+
+        <!-- Dirección del almacén -->
+        <div class="mb-3">
+            <label for="address" class="form-label">Dirección</label>
+            <input type="text" class="form-control" id="address" name="address" th:value="${storage.address}" required>
+        </div>
+
+        <!-- Latitud del almacén -->
+        <div class="mb-3">
+            <label for="lat" class="form-label">Latitud</label>
+            <input type="number" class="form-control" id="lat" name="lat" th:value="${storage.lat}" step="any" required>
+        </div>
+
+        <!-- Longitud del almacén -->
+        <div class="mb-3">
+            <label for="lon" class="form-label">Longitud</label>
+            <input type="number" class="form-control" id="lon" name="lon" th:value="${storage.lon}" step="any" required>
+        </div>
+
+        <!-- Capacidad del almacén -->
+        <div class="mb-3">
+            <label for="capacity" class="form-label">Capacidad</label>
+            <input type="number" class="form-control" id="capacity" name="capacity" th:value="${storage.capacity}" required>
+        </div>
+
+        <!-- Tipo de vehículo -->
+        <div class="mb-3">
+            <label for="typeVehicle" class="form-label">Tipo de Vehículo</label>
+            <select class="form-control" id="typeVehicle" name="typeVehicle" required>
+                <option value="Camión" {{storage.typeVehicle == 'Camión' ? 'selected' : ''}}>Camión</option>
+                <option value="Furgón" {{storage.typeVehicle == 'Furgón' ? 'selected' : ''}}>Furgón</option>
+                <option value="Motocicleta" {{storage.typeVehicle == 'Motocicleta' ? 'selected' : ''}}>Motocicleta</option>
+            </select>
+        </div>
+
+        <!-- Botones de acción -->
+        <div class="mb-3">
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+            <a href="/almacenes" class="btn btn-secondary ms-3">Cancelar</a>
+            <button type="button" class="btn btn-danger ms-3" id="deleteButton">Eliminar Almacén</button>
+        </div>
+    </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+    // Handle the delete button click
+    document.getElementById('deleteButton').addEventListener('click', function() {
+        // Get the id from the current URL (e.g., /almacenes/editar/10)
+        const urlParts = window.location.pathname.split('/');
+        const id = urlParts[urlParts.length - 1];  // Assuming the id is at the end of the URL
+
+        if (confirm('¿Está seguro de que desea eliminar este almacén? Esta acción no se puede deshacer.')) {
+            fetch('/almacenes/' + id, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            })
+            .then(response => {
+                window.location.href = '/almacenes'; // Redirect to the list of storages
+            })
+            .catch(error => {
+                alert('Error de red al intentar eliminar el almacén.');
+            });
+        }
+    });
+</script>
+</body>
+</html>
