@@ -22,6 +22,7 @@ class ProviderService(private val providerRepository: ProviderRepository) {
                 phone = newProvider.phone,
                 createdOn = newProvider.createdOn
             )
+            updated.id = provider.get().id
             providerRepository.save(updated)
         } else null
     }

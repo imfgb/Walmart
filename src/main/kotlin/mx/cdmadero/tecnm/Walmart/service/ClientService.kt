@@ -29,6 +29,7 @@ class ClientService(private val clientRepository: ClientRepository) {
                 email = newClient.email,
                 phone = newClient.phone,
             )
+            updated.id = client.get().id
             clientRepository.save(updated)
         } else null
     }

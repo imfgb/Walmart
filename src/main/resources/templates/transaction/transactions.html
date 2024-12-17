@@ -116,8 +116,9 @@
             const firstValue = filterValue.value;
             const secondValue = secondFilterValue.value;
 
+            if(!start || !end) return;
             let url = `/transacciones/filtrar?startDate=${start}&endDate=${end}`;
-            if (filter !== "default") url += `&filter=${filter}&filterValue=${firstValue}`;
+            if (filter !== "default" && firstValue !== "default") url += `&filter=${filter}&filterValue=${firstValue}`;
             if (secondValue && secondValue !== "default") {
                 url += `&secondFilterValue=${secondValue}`;
             }

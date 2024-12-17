@@ -23,6 +23,7 @@ class StorageService(private val storageRepository: StorageRepository) {
                 capacity = newStorage.capacity,
                 typeVehicle = newStorage.typeVehicle,
             )
+            updated.id = storage.get().id
             storageRepository.save(updated)
         } else null
     }

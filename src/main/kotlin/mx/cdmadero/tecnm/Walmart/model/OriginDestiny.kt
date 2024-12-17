@@ -14,6 +14,6 @@ import org.hibernate.annotations.SQLRestriction
 abstract class OriginDestiny(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    open val id: Long = 0,
+    open var id: Long = 0,
     val isActive: Boolean = true
 )
